@@ -4,7 +4,7 @@ class Card
 
   def initialize (value, suit)
     self.value = value if value < 11
-    self.value = 10 if value > 11 && value != 14
+    self.value = 10 if value > 10 && value != 14
     self.value = 11 if value == 14
     self.suit = suit
     self.name=(value)
