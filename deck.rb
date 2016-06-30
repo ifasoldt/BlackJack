@@ -7,7 +7,8 @@ class Deck
     suits = ['Hearts', 'Diamonds', 'Spades', 'Clubs']
     @deck = []
     suits.each do |suit|
-    [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, [11, 1]].each { |value| @deck << Card.new(value, suit) }
+    (2..14).each { |value| @deck << Card.new(value, suit) }
+    @deck.shuffle!
     end
   end
 
