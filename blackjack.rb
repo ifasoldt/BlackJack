@@ -2,14 +2,15 @@ require './card.rb'
 require './deck.rb'
 
 class BlackJack
-  attr_accessor :deck, :player, :dealer, :player_hand, :dealer_hand, :player_hand_value, :dealer_hand_value, :winners
+  attr_accessor :deck, :player, :dealer, :player_hand, :dealer_hand, :player_hand_value, :dealer_hand_value, :winners, :game_num
 
   def initialize
-    self.deck = Deck.new.deck
+    self.deck = Deck.new.big_deck
     self.dealer = "The dealer"
     self.player_hand = []
     self.dealer_hand = []
     self.winners = []
+    self.game_num = 0
   end
 
   def play(say_intro = true)
@@ -31,7 +32,7 @@ class BlackJack
     hit(dealer_hand)
     hit(player_hand)
     hit(dealer_hand)
-    bust_check
+    check_for_winner
     if player_hand_value == 21
       puts "You got BlackJack! WOOOOOO!!!!"
       player_wins_scenario
@@ -42,14 +43,14 @@ class BlackJack
   end
 
   def player_move
-    status_report_predealer
+    one_status_report
     response = ""
     until response == "stay"
       puts "Would you like to hit or stay?"
       response = gets.chomp
       if response == "hit"
         hit(player_hand)
-        status_report_predealer
+        one_status_report
         check_for_winner
       elsif response == "stay"
         puts "Alright, let's see what the dealer has"
@@ -63,7 +64,7 @@ class BlackJack
     status_report_dealer
     until dealer_hand_value > 15
       hit(dealer_hand)
-      status_report_dealer
+      one_status_report
       bust_check
     end
   end
@@ -136,23 +137,21 @@ class BlackJack
   end
 
   def check_for_winner
-    bust_check
-    six_card_winner
+    if player_hand_value > 21 || dealer_hand_value > 21
+      ace_decrease(player_hand)
+      ace_decrease(dealer_hand)
+      bust_check
+      six_card_winner
+    end
   end
 
-  
+
 
   # could just make bust check return true or false, and then let another method handle the pushing out to dealer wins.
   def bust_check
     if player_hand_value > 21
-      ace_decrease(player_hand)
-    end
-    if player_hand_value > 21
       puts "#{player} busts, the dealer wins!"
       return dealer_wins_scenario
-    end
-    if dealer_hand_value > 21
-      ace_decrease(dealer_hand)
     end
     if dealer_hand_value > 21
       puts "The dealer busts, #{player} wins!"
@@ -161,17 +160,17 @@ class BlackJack
   end
 
   def ace_decrease(hand)
-    hand.each do |card|
-      if card.value == 11
-        card.value = 1
-        self.dealer_hand_value = dealer_hand.inject(0){ |sum, cards| sum + cards.value.to_i }
-        self.player_hand_value = player_hand.inject(0){ |sum, cards| sum + cards.value.to_i }
-        bust_check
-        status_report_predealer
+    if player_hand_value > 21 || dealer_hand_value > 21
+      hand.each do |card|
+        if card.value == 11
+          card.value = 1
+          self.dealer_hand_value = dealer_hand.inject(0){ |sum, cards| sum + cards.value.to_i }
+          self.player_hand_value = player_hand.inject(0){ |sum, cards| sum + cards.value.to_i }
+          one_status_report
+        end
       end
     end
   end
-
 
   def six_card_winner
     if player_hand.length > 5 && player_hand_value < 22
@@ -181,35 +180,45 @@ class BlackJack
   end
 
   def dealer_wins_scenario
-    self.winners << dealer
+    self.game_num += 1
+    self.winners << {game: game_num, winner: dealer}
     puts "Sorry, better luck next time! Would you like to play again? (Y/N)"
     resp = gets.chomp&.downcase[0]
     if resp == "y"
       restart
       play(false)
     else
-      puts "Thanks for playing."
+      puts "Thanks for playing." + winners
       exit
     end
   end
 
   def player_wins_scenario
-    self.winners << dealer
+    self.game_num += 1
+    self.winners << {game: game_num, winner: player}
     puts "Congratulations! Would you like to play again? (Y/N)"
     resp = gets.chomp&.downcase[0]
     if resp == "y"
       restart
       play(false)
     else
-      puts "Thanks for playing."
+      puts "Thanks for playing. Here's a list of the winners #{winners.each {|x| x}}"
       exit
     end
   end
 
   def restart
-    self.deck = Deck.new.deck
+    self.deck = Deck.new.big_deck
     self.player_hand.clear
     self.dealer_hand.clear
+  end
+
+  def one_status_report
+    if dealer_hand.length == 2
+      status_report_predealer
+    else
+      status_report_dealer
+    end
   end
 
 end
