@@ -12,8 +12,8 @@ class BlackJack
     self.winners = []
   end
 
-  def play
-    intro
+  def play(say_intro = true)
+    intro if say_intro
     initial_deal
     player_move
     dealer_move
@@ -32,6 +32,13 @@ class BlackJack
     hit(player_hand)
     hit(dealer_hand)
     bust_check
+    if player_hand_value == 21
+      puts "You got BlackJack! WOOOOOO!!!!"
+      player_wins_scenario
+    elsif dealer_hand_value == 21
+      puts "Wow, dealer hit BlackJack! That sucks."
+      dealer_wins_scenario
+    end
   end
 
   def player_move
@@ -43,7 +50,7 @@ class BlackJack
       if response == "hit"
         hit(player_hand)
         status_report_predealer
-        bust_check
+        check_for_winner
       elsif response == "stay"
         puts "Alright, let's see what the dealer has"
       else
@@ -64,6 +71,8 @@ class BlackJack
   def comparison
     if dealer_hand_value > player_hand_value
       dealer_wins_scenario
+    elsif dealer_hand_value == player_hand_value && dealer_hand.length > player_hand.length
+      dealer_wins_scenario
     else
       player_wins_scenario
     end
@@ -71,8 +80,8 @@ class BlackJack
 
   def hit(which_hand)
     which_hand << deck.shift
-    self.dealer_hand_value = dealer_hand.inject(0){ |sum, card| sum + card.value.to_i }
-    self.player_hand_value = player_hand.inject(0){ |sum, card| sum + card.value.to_i }
+    self.dealer_hand_value = dealer_hand.inject(0){ |sum, cards| sum + cards.value.to_i }
+    self.player_hand_value = player_hand.inject(0){ |sum, cards| sum + cards.value.to_i }
   end
 
   def status_report_predealer
@@ -82,7 +91,7 @@ class BlackJack
 
   def status_report_dealer
     puts "You have a #{player_hand_report} for a total value of #{player_hand.inject(0){|sum, card| sum + card.value}}"
-    puts "The dealer has a #{dealer_hand_report_second} for a total visible value of #{dealer_hand_value}"
+    puts "The dealer has a #{dealer_hand_report_second} for a total value of #{dealer_hand_value}"
   end
 
 
@@ -126,15 +135,48 @@ class BlackJack
     card_list.join
   end
 
+  def check_for_winner
+    bust_check
+    six_card_winner
+  end
 
+  
+
+  # could just make bust check return true or false, and then let another method handle the pushing out to dealer wins.
   def bust_check
+    if player_hand_value > 21
+      ace_decrease(player_hand)
+    end
     if player_hand_value > 21
       puts "#{player} busts, the dealer wins!"
       return dealer_wins_scenario
     end
     if dealer_hand_value > 21
+      ace_decrease(dealer_hand)
+    end
+    if dealer_hand_value > 21
       puts "The dealer busts, #{player} wins!"
       return player_wins_scenario
+    end
+  end
+
+  def ace_decrease(hand)
+    hand.each do |card|
+      if card.value == 11
+        card.value = 1
+        self.dealer_hand_value = dealer_hand.inject(0){ |sum, cards| sum + cards.value.to_i }
+        self.player_hand_value = player_hand.inject(0){ |sum, cards| sum + cards.value.to_i }
+        bust_check
+        status_report_predealer
+      end
+    end
+  end
+
+
+  def six_card_winner
+    if player_hand.length > 5 && player_hand_value < 22
+      puts "You have 6 cards and haven't busted! You win!"
+      player_wins_scenario
     end
   end
 
@@ -144,7 +186,7 @@ class BlackJack
     resp = gets.chomp&.downcase[0]
     if resp == "y"
       restart
-      play
+      play(false)
     else
       puts "Thanks for playing."
       exit
@@ -157,7 +199,7 @@ class BlackJack
     resp = gets.chomp&.downcase[0]
     if resp == "y"
       restart
-      play
+      play(false)
     else
       puts "Thanks for playing."
       exit
@@ -165,7 +207,7 @@ class BlackJack
   end
 
   def restart
-    deck = Deck.new.deck
+    self.deck = Deck.new.deck
     self.player_hand.clear
     self.dealer_hand.clear
   end

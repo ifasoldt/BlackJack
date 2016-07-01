@@ -9,6 +9,9 @@ class Deck
     suits.each do |suit|
     (2..14).each { |value| @deck << Card.new(value, suit) }
     @deck.shuffle!
+    @big_deck = []
+    7.times each do
+    big_deck << deck
     end
   end
 
