@@ -46,7 +46,7 @@ class BlackJack
   def player_moves
     # each over the hands here and do this with all of them. Each do |x| x gets shoved into hit.
     player_hands.each do |this_hand|
-      one_status_report
+      status_report_predealer(this_hand)
       response = ""
       until response == "stay" || busted?(this_hand)
         puts "Would you like to hit or stay?"
@@ -54,7 +54,7 @@ class BlackJack
         if response == "hit"
           # assuming eached over all the hands above somewhere.
           this_hand << hit
-          one_status_report
+          status_report_predealer(this_hand)
         elsif response == "stay"
           puts "Alright, let's see what the dealer has"
         else
@@ -69,7 +69,7 @@ class BlackJack
     status_report_dealer
     until calc_dealer_hand_value > 15
       dealer_hand << hit
-      one_status_report
+      status_report_dealer
       bust_check_dealer
     end
   end
@@ -235,7 +235,7 @@ class BlackJack
         if response[0] == "y"
           player_hands.insert(-1,[hand[0], hit], [hand[1], hit])
           player_hands.delete_at(player_hands.index(hand))
-          status_report_predealer
+          status_report_predealer_split
           split
         end
       end
