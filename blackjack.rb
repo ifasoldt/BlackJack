@@ -40,9 +40,11 @@ class BlackJack
     player_hands[0] << hit
     dealer_hand << hit
     bust_check_dealer
-    check_for_winner(player_hands[0])
-    blackjack_check(player_hands[0])
     split
+    player_hands.each do |hand|
+      check_for_winner(hand)
+      blackjack_check(hand)
+    end
   end
 
   def player_moves
@@ -50,15 +52,15 @@ class BlackJack
     player_hands.each do |this_hand|
       status_report_predealer(this_hand)
       response = ""
-      until response == "stay" || busted?(this_hand)
+      until response[0] == "s" || busted?(this_hand)
         hit_advice_prompt(this_hand)
-        puts "Would you like to hit or stay?"
+        puts "Would you like to hit or stand?"
         response = gets.chomp
-        if response == "hit"
+        if response[0] == "h"
           # assuming eached over all the hands above somewhere.
           this_hand << hit
           status_report_predealer(this_hand)
-        elsif response == "stay"
+        elsif response[0] == "s"
           puts "Alright, let's see what the dealer has"
         else
           puts "Please respond with 'hit' or 'stay'. All other input is invalid"
@@ -223,6 +225,7 @@ class BlackJack
   def split
     player_hands.each do |hand|
       if hand[0].name == hand[1].name
+        split_advice_prompt(hand[0])
         puts "Would you like to split your hand? #{hand} If so, then type 'yes'"
         response = gets.chomp.downcase
         if response[0] == "y"
