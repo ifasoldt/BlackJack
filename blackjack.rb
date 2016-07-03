@@ -1,11 +1,13 @@
 require './card.rb'
 require './deck.rb'
 require './status_reports.rb'
+require './advisor.rb'
 
 class BlackJack
   attr_accessor :deck, :player, :dealer, :player_hands, :dealer_hand, :dealer_hand_value, :winners, :game_num
 
   include StatusReports
+  include Advisor
 
   def initialize
     self.deck = Deck.new.big_deck
@@ -49,6 +51,7 @@ class BlackJack
       status_report_predealer(this_hand)
       response = ""
       until response == "stay" || busted?(this_hand)
+        hit_advice_prompt(this_hand)
         puts "Would you like to hit or stay?"
         response = gets.chomp
         if response == "hit"
@@ -140,16 +143,6 @@ class BlackJack
     new_card
   end
 
-
-  def dealer_seen_value
-    i = 1
-    sum = 0
-    while i < dealer_hand.length
-      sum += dealer_hand[i].value
-      i += 1
-    end
-    sum
-  end
 
   # could just make bust check return true or false, and then let another method handle the pushing out to dealer wins.
   def bust_check_player(player_hand_a)
