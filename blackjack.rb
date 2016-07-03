@@ -1,8 +1,11 @@
 require './card.rb'
 require './deck.rb'
+require './status_reports.rb'
 
 class BlackJack
   attr_accessor :deck, :player, :dealer, :player_hands, :dealer_hand, :dealer_hand_value, :winners, :game_num
+
+  include StatusReports
 
   def initialize
     self.deck = Deck.new.big_deck
@@ -73,12 +76,14 @@ class BlackJack
 
   def comparison
     player_hands.each do |this_hand_for_comparison|
-      if calc_dealer_hand_value > calc_hand(this_hand_for_comparison)
-        dealer_wins_scenario
-      elsif calc_dealer_hand_value == calc_hand(this_hand_for_comparison) && dealer_hand.length > this_hand_for_comparison.length
-        dealer_wins_scenario
-      else
-        player_wins_scenario
+      unless busted?(this_hand_for_comparison)
+        if calc_dealer_hand_value > calc_hand(this_hand_for_comparison)
+          dealer_wins_scenario
+        elsif calc_dealer_hand_value == calc_hand(this_hand_for_comparison) && dealer_hand.length > this_hand_for_comparison.length
+          dealer_wins_scenario
+        else
+          player_wins_scenario
+        end
       end
     end
   end
@@ -135,39 +140,6 @@ class BlackJack
     new_card
   end
 
-  def status_report_predealer
-    puts "You have a #{player_hand_report.each {|hand_list| hand_list.flatten}}"
-    puts "The dealer has a #{dealer_hand_report_first} and another facedown card for a total visible value of #{dealer_seen_value}"
-  end
-
-  def status_report_dealer
-    puts "You have a #{player_hand_report.each {|hand_list| hand_list.flatten}}"
-    puts "The dealer has a #{dealer_hand_report_second} for a total value of #{calc_dealer_hand_value}"
-  end
-
-  def one_status_report
-    if dealer_hand.length == 2
-      status_report_predealer
-    else
-      status_report_dealer
-    end
-  end
-
-
-
-  def player_hand_report
-    hand_list = []
-    player_hands.each do |hand|
-      card_list = []
-      hand.each do |card|
-        card_list << " #{card.name} of #{card.suit},"
-      end
-      card_list.insert(-2, " and a")
-      card_list << " for a total value of #{hand.inject(0){|sum, card| sum + card.value}}"
-      hand_list << [card_list.join]
-    end
-    hand_list
-  end
 
   def dealer_seen_value
     i = 1
@@ -177,26 +149,6 @@ class BlackJack
       i += 1
     end
     sum
-  end
-
-  def dealer_hand_report_first
-    card_list = []
-    i = 1
-    while i < dealer_hand.length
-      card_list << " #{dealer_hand[i].name} of #{dealer_hand[i].suit},"
-      i += 1
-    end
-    card_list.insert(-2, " and a") if dealer_hand.length > 2
-    card_list.join
-  end
-
-  def dealer_hand_report_second
-    card_list = []
-    dealer_hand.each do |card|
-    card_list << " #{card.name} of #{card.suit},"
-    end
-    card_list.insert(-2, " and a")
-    card_list.join
   end
 
   # could just make bust check return true or false, and then let another method handle the pushing out to dealer wins.
@@ -220,6 +172,7 @@ class BlackJack
       if calc_hand(hand) > 21 || calc_dealer_hand_value > 21
         if card.value == 11
           card.value = 1
+          puts "Ace reassigned, total value now #{calc_hand(hand)}"
         end
       end
     end
@@ -277,15 +230,13 @@ class BlackJack
   def split
     player_hands.each do |hand|
       if hand[0].name == hand[1].name
-        puts "Would you like to split your hand? #{hand} (Y/N)"
+        puts "Would you like to split your hand? #{hand} If so, then type 'yes'"
         response = gets.chomp.downcase
-        if response == "y"
+        if response[0] == "y"
           player_hands.insert(-1,[hand[0], hit], [hand[1], hit])
           player_hands.delete_at(player_hands.index(hand))
           status_report_predealer
           split
-        elsif response == "n"
-          next
         end
       end
     end
