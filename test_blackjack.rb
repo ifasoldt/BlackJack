@@ -101,20 +101,69 @@ class BlackJackTest < MiniTest::Test
     assert game3.dealer_hand_value == game3.calc_hand([card5, card3])
     assert game3.winners[0] == {game: 1, winner: "Isaiah"}
   end
-  #
-  # def test_6_card_win
-  #   game4 = BlackJack.new
-  #   card1 = Card.new(2, "Hearts")
-  #   card3 = Card.new(3, "Spades")
-  #   card5 = Card.new(2, "Diamonds")
-  #   card6 = Card.new(3, "Hearts")
-  #   card2 = Card.new(4, "Clubs")
-  #   card7 = Card.new(10, "Diamonds")
-  #   card8 = Card.new(12, "Clubs")
-  #   game4.player = "Isaiah"
-  #   game4.test_switch = true
-  #   game4.dealer_hand.clear
-  #   game4.play(false, true, [card5, card3], [card3, card5])
-  #   assert game3.dealer_hand_value == game3.calc_hand([card5, card3])
-  #   assert game3.winners[0] == {game: 1, winner: "Isaiah"}
+
+  def test_6_card_win
+    game4 = BlackJack.new
+    card1 = Card.new(2, "Hearts")
+    card2 = Card.new(4, "Clubs")
+    card3 = Card.new(3, "Spades")
+    card4 = Card.new(2, "Clubs")
+    card5 = Card.new(2, "Diamonds")
+    card6 = Card.new(3, "Hearts")
+    card7 = Card.new(10, "Diamonds")
+    card8 = Card.new(12, "Clubs")
+    game4.player = "Isaiah"
+    game4.test_switch = true
+    game4.play(false, true, [card1, card2, card3, card4, card5, card6], [card7, card8])
+    assert game4.winners[0] == {game: 1, winner: "Isaiah"}
+    assert game4.calc_dealer_hand_value > game4.calc_hand([card1, card2, card3, card4, card5, card6])
+  end
+
+  def test_dealer_blackjack
+    game5 = BlackJack.new
+    card1 = Card.new(10, "Hearts")
+    card2 = Card.new(14, "Clubs")
+    card3 = Card.new(8, "Spades")
+    card4 = Card.new(3, "Clubs")
+    game5.player = "Isaiah"
+    game5.test_switch = true
+    game5.play(false, true, [card1, card3, card4], [card1, card2])
+    puts game5.winners
+    assert game5.winners[0] == {game: 1, winner: "The dealer"}
+  end
+
+  def test_ties_go_to_most_cards_then_player
+    game6 = BlackJack.new
+    card1 = Card.new(10, "Hearts")
+    card2 = Card.new(10, "Clubs")
+    card3 = Card.new(8, "Spades")
+    card4 = Card.new(5, "Clubs")
+    card5 = Card.new(3, "Diamonds")
+    game6.player = "Isaiah"
+    game6.test_switch = true
+    game6.play(false, true, [card1, card3], [card1, card4, card5])
+    assert game6.winners[0] == {game: 1, winner: "The dealer"}
+    game7 = BlackJack.new
+    game7.player = "Isaiah"
+    game7.test_switch = true
+    game7.play(false, true, [card1, card4, card5], [card1, card4, card5])
+    assert game7.winners[0] == {game: 1, winner: "Isaiah"}
+  end
+
+  def test_aces_become_1_if_bust
+    game8 = BlackJack.new
+    card1 = Card.new(14, "Hearts")
+    card2 = Card.new(12, "Clubs")
+    card3 = Card.new(8, "Clubs")
+    game8.test_switch = true
+    assert card1.value == 11
+    game8.play(false, true, [card1, card2, card3], [card2, card3])
+    assert card1.value == 1
+  end
+
+  def test_big_deck_7_decks
+    game9 = BlackJack.new
+    assert game9.deck.length == 52 * 7
+  end
+
 end

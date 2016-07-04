@@ -4,9 +4,9 @@ module Advisor
       return "STAND"
     elsif calc_hand(player_hand_f) > 16 && include_ace?(player_hand_f) == false
       return "STAND"
-    elsif calc_hand(player_hand_f) == 18 && include_ace(player_hand_f) && dealer_seen_value > 8
+    elsif calc_hand(player_hand_f) == 18 && include_ace?(player_hand_f) && dealer_seen_value > 8
       return "HIT"
-    elsif calc_hand(player_hand_f) == 18 && include_ace(player_hand_f)
+    elsif calc_hand(player_hand_f) == 18 && include_ace?(player_hand_f)
       return "STAND"
     elsif include_ace?(player_hand_f)
       return "HIT"

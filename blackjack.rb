@@ -67,7 +67,6 @@ class BlackJack
             this_hand << hit
             status_report_predealer(this_hand)
           elsif response[0] == "s"
-            puts "Alright, let's see what the dealer has"
           else
             puts "Please respond with 'hit' or 'stay'. All other input is invalid"
           end
@@ -78,6 +77,7 @@ class BlackJack
   end
 
   def dealer_move
+    puts "Alright, let's see what the dealer has"
     status_report_dealer unless test_switch
     until calc_dealer_hand_value > 15
       dealer_hand << hit
@@ -89,7 +89,10 @@ class BlackJack
   def comparison
     player_hands.each do |this_hand_for_comparison|
       unless busted?(this_hand_for_comparison)
-        if calc_dealer_hand_value > calc_hand(this_hand_for_comparison)
+        if calc_dealer_hand_value == 21 && dealer_hand.length == 2 && (this_hand_for_comparison.length > 2 || calc_hand(this_hand_for_comparison) < 21)
+          puts "Dealer had blackjack, tough luck!"
+          dealer_wins_scenario
+        elsif calc_dealer_hand_value > calc_hand(this_hand_for_comparison)
           dealer_wins_scenario
         elsif calc_dealer_hand_value == calc_hand(this_hand_for_comparison) && dealer_hand.length > this_hand_for_comparison.length
           dealer_wins_scenario
@@ -117,21 +120,17 @@ class BlackJack
       ace_decrease(pl_hand)
       ace_decrease(dealer_hand)
       bust_check_player(pl_hand)
-      six_card_winner(pl_hand)
     end
+      six_card_winner(pl_hand)
   end
 
   def blackjack_check(player_hand_b)
     self.blackjack_counter = 0
-    if calc_hand(player_hand_b) == 21
+    if calc_hand(player_hand_b) == 21 && player_hand_b.length == 2
       puts "You got BlackJack! WOOOOOO!!!!"
       player_wins_scenario
       self.blackjack_counter += 1
-      rematch? unless test_switch
-    elsif calc_dealer_hand_value == 21
-      puts "Wow, dealer hit BlackJack! That sucks."
-      dealer_wins_scenario
-      rematch? unless test_switch
+      rematch? if !test_switch && all_hands_completed?
     end
   end
 
