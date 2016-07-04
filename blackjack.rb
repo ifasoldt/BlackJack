@@ -4,7 +4,7 @@ require './status_reports.rb'
 require './advisor.rb'
 
 class BlackJack
-  attr_accessor :deck, :player, :dealer, :player_hands, :dealer_hand, :dealer_hand_value, :winners, :game_num
+  attr_accessor :deck, :player, :dealer, :player_hands, :dealer_hand, :dealer_hand_value, :winners, :game_num, :test_switch
 
   include StatusReports
   include Advisor
@@ -16,16 +16,21 @@ class BlackJack
     self.dealer_hand = []
     self.winners = []
     self.game_num = 0
+    self.test_switch = false
   end
 
-  def play(say_intro = true)
+  def play(say_intro = true, initial_deal_inject_switch = false, player_hand_inject = [], dealer_hand_inject = [])
     intro if say_intro
-    initial_deal
+    if initial_deal_inject_switch
+      initial_deal_inject(player_hand_inject, dealer_hand_inject)
+    else
+      initial_deal
+    end
     player_moves
     #I think the unless busted? needs to go inside the dealer_move and comparison methods, and I think that I have to iterate in each of them over every hand. This also means busted has to take an argument of the hand we are looking at.
     dealer_move unless all_hands_busted?
     comparison unless all_hands_busted?
-    rematch?
+    rematch? unless test_switch
   end
 
   def intro
@@ -50,20 +55,22 @@ class BlackJack
   def player_moves
     # each over the hands here and do this with all of them. Each do |x| x gets shoved into hit.
     player_hands.each do |this_hand|
-      status_report_predealer(this_hand)
+      status_report_predealer(this_hand) unless test_switch
       response = ""
-      until response[0] == "s" || busted?(this_hand)
-        hit_advice_prompt(this_hand)
-        puts "Would you like to hit or stand?"
-        response = gets.chomp
-        if response[0] == "h"
-          # assuming eached over all the hands above somewhere.
-          this_hand << hit
-          status_report_predealer(this_hand)
-        elsif response[0] == "s"
-          puts "Alright, let's see what the dealer has"
-        else
-          puts "Please respond with 'hit' or 'stay'. All other input is invalid"
+      unless test_switch
+        until response[0] == "s" || busted?(this_hand)
+          hit_advice_prompt(this_hand)
+          puts "Would you like to hit or stand?"
+          response = gets.chomp
+          if response[0] == "h"
+            # assuming eached over all the hands above somewhere.
+            this_hand << hit
+            status_report_predealer(this_hand)
+          elsif response[0] == "s"
+            puts "Alright, let's see what the dealer has"
+          else
+            puts "Please respond with 'hit' or 'stay'. All other input is invalid"
+          end
         end
       end
       check_for_winner(this_hand)
@@ -71,10 +78,10 @@ class BlackJack
   end
 
   def dealer_move
-    status_report_dealer
+    status_report_dealer unless test_switch
     until calc_dealer_hand_value > 15
       dealer_hand << hit
-      status_report_dealer
+      status_report_dealer unless test_switch
       bust_check_dealer
     end
   end
@@ -118,10 +125,11 @@ class BlackJack
     if calc_hand(player_hand_b) == 21
       puts "You got BlackJack! WOOOOOO!!!!"
       player_wins_scenario
-      rematch?
+      rematch? unless test_switch
     elsif calc_dealer_hand_value == 21
       puts "Wow, dealer hit BlackJack! That sucks."
-      rematch?
+      dealer_wins_scenario
+      rematch? unless test_switch
     end
   end
 
@@ -155,8 +163,8 @@ class BlackJack
   end
 
   def bust_check_dealer
+    ace_decrease(dealer_hand)
     if calc_dealer_hand_value > 21
-      ace_decrease(dealer_hand)
       puts "The dealer busts, #{player} wins!"
       return player_wins_scenario
     end
@@ -238,7 +246,15 @@ class BlackJack
     end
   end
 
+  def initial_deal_inject(player_hand_inject, dealer_hand_inject)
+    player_hands[0] = player_hand_inject
+    dealer_hand = dealer_hand_inject
+    bust_check_dealer
+    split
+    player_hands.each do |hand|
+      check_for_winner(hand)
+      blackjack_check(hand)
+    end
+  end
 
 end
-
-BlackJack.new.play

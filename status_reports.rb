@@ -59,7 +59,7 @@ module StatusReports
     card_list.insert(-2, " and a")
     card_list.join
   end
-  
+
   def dealer_seen_value
     i = 1
     sum = 0
