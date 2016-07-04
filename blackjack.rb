@@ -4,7 +4,7 @@ require './status_reports.rb'
 require './advisor.rb'
 
 class BlackJack
-  attr_accessor :deck, :player, :dealer, :player_hands, :dealer_hand, :dealer_hand_value, :winners, :game_num, :test_switch
+  attr_accessor :deck, :player, :dealer, :player_hands, :dealer_hand, :dealer_hand_value, :winners, :game_num, :test_switch, :blackjack_counter
 
   include StatusReports
   include Advisor
@@ -28,8 +28,8 @@ class BlackJack
     end
     player_moves
     #I think the unless busted? needs to go inside the dealer_move and comparison methods, and I think that I have to iterate in each of them over every hand. This also means busted has to take an argument of the hand we are looking at.
-    dealer_move unless all_hands_busted?
-    comparison unless all_hands_busted?
+    dealer_move unless all_hands_completed?
+    comparison unless all_hands_completed?
     rematch? unless test_switch
   end
 
@@ -122,9 +122,11 @@ class BlackJack
   end
 
   def blackjack_check(player_hand_b)
+    self.blackjack_counter = 0
     if calc_hand(player_hand_b) == 21
       puts "You got BlackJack! WOOOOOO!!!!"
       player_wins_scenario
+      self.blackjack_counter += 1
       rematch? unless test_switch
     elsif calc_dealer_hand_value == 21
       puts "Wow, dealer hit BlackJack! That sucks."
@@ -216,14 +218,14 @@ class BlackJack
     @dealer_hand_value
   end
 
-  def all_hands_busted?
+  def all_hands_completed?
     busted_count = 0
     player_hands.each do |hand|
       if busted?(hand)
         busted_count += 1
       end
     end
-    if busted_count == player_hands.length
+    if busted_count + blackjack_counter == player_hands.length
       return true
     else
       return false
@@ -248,7 +250,7 @@ class BlackJack
 
   def initial_deal_inject(player_hand_inject, dealer_hand_inject)
     player_hands[0] = player_hand_inject
-    dealer_hand = dealer_hand_inject
+    self.dealer_hand += dealer_hand_inject
     bust_check_dealer
     split
     player_hands.each do |hand|

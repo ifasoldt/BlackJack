@@ -87,9 +87,34 @@ class BlackJackTest < MiniTest::Test
     game2.player = "Isaiah"
     game2.test_switch = true
     game2.play(false, true, [card2, card3], [card3, card5])
-    puts game2.winners
     assert game2.winners[0] == {game: 1, winner: "Isaiah"}
     assert game2.dealer_hand.length == 2
   end
 
+  def test_ties_go_to_player
+    game3 = BlackJack.new
+    card3 = Card.new(10, "Spades")
+    card5 = Card.new(9, "Diamonds")
+    game3.player = "Isaiah"
+    game3.test_switch = true
+    game3.play(false, true, [card5, card3], [card3, card5])
+    assert game3.dealer_hand_value == game3.calc_hand([card5, card3])
+    assert game3.winners[0] == {game: 1, winner: "Isaiah"}
+  end
+  #
+  # def test_6_card_win
+  #   game4 = BlackJack.new
+  #   card1 = Card.new(2, "Hearts")
+  #   card3 = Card.new(3, "Spades")
+  #   card5 = Card.new(2, "Diamonds")
+  #   card6 = Card.new(3, "Hearts")
+  #   card2 = Card.new(4, "Clubs")
+  #   card7 = Card.new(10, "Diamonds")
+  #   card8 = Card.new(12, "Clubs")
+  #   game4.player = "Isaiah"
+  #   game4.test_switch = true
+  #   game4.dealer_hand.clear
+  #   game4.play(false, true, [card5, card3], [card3, card5])
+  #   assert game3.dealer_hand_value == game3.calc_hand([card5, card3])
+  #   assert game3.winners[0] == {game: 1, winner: "Isaiah"}
 end
