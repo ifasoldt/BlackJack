@@ -1,13 +1,13 @@
 module StatusReports
 
   def status_report_predealer(player_hand_d)
-    puts "For hand number #{player_hands.index(player_hand_d) + 1} you have a #{player_hand_report_simple(player_hand_d)}"
-    puts "The dealer has a #{dealer_hand_report_first} and another facedown card for a total visible value of #{dealer_seen_value}"
+    puts "For hand number #{player_hands.index(player_hand_d) + 1} you have a #{player_hand_report_simple(player_hand_d)}."
+    puts "The dealer has a #{dealer_hand_report_first} and another facedown card for a total visible value of #{dealer_seen_value}."
   end
 
   def status_report_predealer_split
     puts "You have a #{player_hand_report}"
-    puts "The dealer has a #{dealer_hand_report_first} and another facedown card for a total visible value of #{dealer_seen_value}"
+    puts "The dealer has a #{dealer_hand_report_first} and another facedown card for a total visible value of #{dealer_seen_value}."
   end
 
 
@@ -23,7 +23,7 @@ module StatusReports
 
   def status_report_dealer
     puts "You have a #{player_hand_report}"
-    puts "The dealer has a #{dealer_hand_report_second} for a total value of #{calc_dealer_hand_value}"
+    puts "The dealer has a #{dealer_hand_report_second} for a total value of #{calc_dealer_hand_value}."
   end
 
   def player_hand_report

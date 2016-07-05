@@ -45,7 +45,7 @@ class BlackJack
   def intro
     puts 'Welcome to the IronYard BlackJack Table. What is your name?'
     self.player = gets.chomp
-    puts "Welcome #{player}. Let's get started"
+    puts "Welcome #{player}. Let's get started."
   end
 
   def initial_deal
@@ -74,7 +74,7 @@ class BlackJack
             status_report_predealer(this_hand)
           elsif response[0] == "s"
           else
-            puts "Please respond with 'hit' or 'stay'. All other input is invalid"
+            puts "Please respond with 'hit' or 'stay'. All other input is invalid."
           end
         end
       end
@@ -83,7 +83,7 @@ class BlackJack
   end
 
   def dealer_move
-    puts "Alright, let's see what the dealer has"
+    puts "Alright, let's see what the dealer has."
     status_report_dealer unless test_switch
     until calc_dealer_hand_value > 15
       dealer_hand << hit
@@ -116,7 +116,7 @@ class BlackJack
       restart
       play(false)
     else
-      puts "Thanks for playing. Here's a list of the winners #{winners.each { |x| x }}"
+      puts "Thanks for playing. Here's a list of the winners #{winners.each { |x| x }}."
       exit
     end
   end
@@ -187,7 +187,7 @@ class BlackJack
       if calc_hand(hand) > 21 || calc_dealer_hand_value > 21
         if card.value == 11
           card.value = 1
-          puts "Ace reassigned, total value now #{calc_hand(hand)}"
+          puts "Ace reassigned, total value now #{calc_hand(hand)}."
         end
       end
     end
@@ -246,7 +246,7 @@ class BlackJack
     player_hands.each do |hand|
       if hand[0].name == hand[1].name
         split_advice_prompt(hand[0])
-        puts "Would you like to split your hand? #{hand} If so, then type 'yes'"
+        puts "Would you like to split your hand? #{hand} If so, then type 'yes'."
         response = gets.chomp.downcase
         if response[0] == "y"
           player_hands.insert(-1, [hand[0], hit], [hand[1], hit])
