@@ -3,15 +3,25 @@ require './deck.rb'
 require './status_reports.rb'
 require './advisor.rb'
 
+# Game class for blackjack.
 class BlackJack
-  attr_accessor :deck, :player, :dealer, :player_hands, :dealer_hand, :dealer_hand_value, :winners, :game_num, :test_switch, :blackjack_counter
+  attr_accessor :deck,
+                :player,
+                :dealer,
+                :player_hands,
+                :dealer_hand,
+                :dealer_hand_value,
+                :winners,
+                :game_num,
+                :test_switch,
+                :blackjack_counter
 
   include StatusReports
   include Advisor
 
   def initialize
     self.deck = Deck.new.big_deck
-    self.dealer = "The dealer"
+    self.dealer = 'The dealer'
     self.player_hands = [[]]
     self.dealer_hand = []
     self.winners = []
@@ -27,23 +37,19 @@ class BlackJack
       initial_deal
     end
     player_moves
-    #I think the unless busted? needs to go inside the dealer_move and comparison methods, and I think that I have to iterate in each of them over every hand. This also means busted has to take an argument of the hand we are looking at.
     dealer_move unless all_hands_completed?
     comparison unless all_hands_completed?
     rematch? unless test_switch
   end
 
   def intro
-    puts "Welcome to the IronYard BlackJack Table. What would you like to be called?"
+    puts 'Welcome to the IronYard BlackJack Table. What is your name?'
     self.player = gets.chomp
     puts "Welcome #{player}. Let's get started"
   end
 
   def initial_deal
-    player_hands[0] << hit
-    dealer_hand << hit
-    player_hands[0] << hit
-    dealer_hand << hit
+    create_hands
     bust_check_dealer
     split
     player_hands.each do |hand|
@@ -105,14 +111,21 @@ class BlackJack
 
   def rematch?
     puts "Would you like to play again? (Y/N)"
-    resp = gets.chomp&.downcase[0]
+    resp = gets.chomp.downcase[0]
     if resp == "y"
       restart
       play(false)
     else
-      puts "Thanks for playing. Here's a list of the winners #{winners.each {|x| x}}"
+      puts "Thanks for playing. Here's a list of the winners #{winners.each { |x| x }}"
       exit
     end
+  end
+
+  def create_hands
+    player_hands[0] << hit
+    dealer_hand << hit
+    player_hands[0] << hit
+    dealer_hand << hit
   end
 
   def check_for_winner(pl_hand)
@@ -121,7 +134,7 @@ class BlackJack
       ace_decrease(dealer_hand)
       bust_check_player(pl_hand)
     end
-      six_card_winner(pl_hand)
+    six_card_winner(pl_hand)
   end
 
   def blackjack_check(player_hand_b)
@@ -148,12 +161,10 @@ class BlackJack
     end
   end
 
-
   def hit
     new_card = deck.shift
     new_card
   end
-
 
   # could just make bust check return true or false, and then let another method handle the pushing out to dealer wins.
   def bust_check_player(player_hand_a)
@@ -198,22 +209,22 @@ class BlackJack
 
   def player_wins_scenario
     self.game_num += 1
-    self.winners << {game: game_num, winner: player}
-    puts "Congratulations! You won!"
+    winners << { game: game_num, winner: player }
+    puts 'Congratulations! You won!'
   end
 
   def restart
     self.deck = Deck.new.big_deck
     self.player_hands = [[]]
-    self.dealer_hand.clear
+    dealer_hand.clear
   end
 
   def calc_hand(hand)
-    hand.inject(0) {|sum, card| sum + card.value }
+    hand.inject(0) { |sum, card| sum + card.value }
   end
 
   def calc_dealer_hand_value
-    self.dealer_hand_value = dealer_hand.inject(0){|sum, card| sum + card.value}
+    self.dealer_hand_value = dealer_hand.inject(0){ |sum, card| sum + card.value }
     @dealer_hand_value
   end
 
@@ -238,7 +249,7 @@ class BlackJack
         puts "Would you like to split your hand? #{hand} If so, then type 'yes'"
         response = gets.chomp.downcase
         if response[0] == "y"
-          player_hands.insert(-1,[hand[0], hit], [hand[1], hit])
+          player_hands.insert(-1, [hand[0], hit], [hand[1], hit])
           player_hands.delete_at(player_hands.index(hand))
           status_report_predealer_split
           split
@@ -257,5 +268,4 @@ class BlackJack
       blackjack_check(hand)
     end
   end
-
 end
